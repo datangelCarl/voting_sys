@@ -1,5 +1,6 @@
 const {Router} = require("express")
 const { registerVoter, loginVoter, getVoter } = require("../controllers/voterController")
+const { addElection, getElections, getElection, removeElection, updateElection, getElectionCandidates, getElectionVoters } = require("../controllers/electionController")
 
 const router = Router()
 
