@@ -4,12 +4,12 @@ const { addElection, getElections, getElection, removeElection, updateElection, 
 
 const router = Router()
 
-//register, login voter route
+//voter route
 router.post('/voters/register', registerVoter)
 router.post('/voters/login', loginVoter)
 router.post('/voters/:id', getVoter)
 
-
+//election route
 router.post('/elections', addElection)
 router.get('/elections', getElections)
 router.get('/elections/:id', getElection)
