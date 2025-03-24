@@ -1,27 +1,22 @@
-const Candidate = require('../schemas/candidateSchema');
-const Election = require('../schemas/electionSchema');
-const User = require('../schemas/userSchema');
-const Vote = require('../schemas/voteSchema');
-const College = require('../schemas/collegeSchema');
+const {createCollege, deleteCollege, findCollegeById} = require('../models/collegeModel');
+const {createDepartment, deleteDepartment, findDepartmentById} = require('../models/departmentModel');
+const {createElection, deleteElection, findElectionById} = require('../models/electionModel');
+const {createCandidate, deleteCandidate, findCandidatesByElection} = require('../models/candidateModel');
+const {getVotedStudents, getNonVotedStudents, getVotesByCandidate} = require('../models/voteModel');
 
-//create College
 exports.createCollege = async (req, res) => {
   try {
     const { name } = req.body;
-    const college = new College({ name });
-    await college.save();
+    const college = await createCollege(name);
     res.status(201).json({ message: 'College created', college });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-
-//delete College
 exports.deleteCollege = async (req, res) => {
   try {
-    const { id } = req.params;
-    const deleted = await College.findByIdAndDelete(id);
+    const deleted = await deleteCollege(req.params.id);
     if (!deleted) return res.status(404).json({ message: 'College not found' });
     res.status(200).json({ message: 'College deleted' });
   } catch (err) {
@@ -31,14 +26,11 @@ exports.deleteCollege = async (req, res) => {
 
 
 //create department
-const Department = require('../schemas/departmentSchema');
-
 exports.createDepartment = async (req, res) => {
   try {
     const { name, collegeId } = req.body;
 
-    const department = new Department({ name, college: collegeId });
-    await department.save();
+    const department = await createDepartment(name, collegeId);
 
     res.status(201).json({ message: 'Department created', department });
   } catch (err) {
@@ -51,7 +43,7 @@ exports.createDepartment = async (req, res) => {
 exports.deleteDepartment = async (req, res) => {
   try {
     const { id } = req.params;
-    const deleted = await Department.findByIdAndDelete(id);
+    const deleted = await deleteDepartment(id);
     if (!deleted) return res.status(404).json({ message: 'Department not found' });
     res.status(200).json({ message: 'Department deleted' });
   } catch (err) {
@@ -65,18 +57,7 @@ exports.createElection = async (req, res) => {
     try {
       const { name, position, collegeId, departmentId, startDate, endDate } = req.body;
   
-      const election = new Election({
-        name,
-        position,
-        college: collegeId,
-        department: departmentId,
-        startDate,
-        endDate,
-        status: 'upcoming',
-      });      
-  
-      await election.save();
-  
+      const election = await createElection(name, position, collegeId, departmentId, startDate, endDate);
       res.status(201).json({ message: 'Election created successfully', election });
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -88,7 +69,7 @@ exports.createElection = async (req, res) => {
     try {
       const { id } = req.params;
   
-      const deletedElection = await Election.findByIdAndDelete(id);
+      const deletedElection = await deleteElection(id);
       if (!deletedElection) {
         return res.status(404).json({ message: 'Election not found' });
       }
@@ -104,31 +85,20 @@ exports.addCandidate = async (req, res) => {
   try {
     const { firstName, lastName, position, electionId } = req.body;
 
-    // Validate Election
-    const election = await Election.findById(electionId);
+    const election = await findElectionById(electionId);
     if (!election) return res.status(404).json({ message: 'Election not found' });
 
-    // Use the college and department from the election
     const collegeId = election.college;
     const departmentId = election.department;
 
     // Optionally, validate if college and department exist (if needed)
-    const college = await College.findById(collegeId);
+    const college = await findCollegeById(collegeId);
     if (!college) return res.status(404).json({ message: 'College not found (from election)' });
 
-    const department = await Department.findById(departmentId);
+    const department = await findDepartmentById(departmentId);
     if (!department) return res.status(404).json({ message: 'Department not found (from election)' });
 
-    const candidate = new Candidate({
-      firstName,
-      lastName,
-      position,
-      election: electionId,
-      college: collegeId,
-      department: departmentId,
-    });
-
-    await candidate.save();
+    const candidate = await createCandidate(firstName, lastName, position, electionId, collegeId, departmentId);
     res.status(201).json({ message: 'Candidate added', candidate });
 
   } catch (err) {
@@ -140,7 +110,7 @@ exports.addCandidate = async (req, res) => {
 // Delete Candidate
 exports.deleteCandidate = async (req, res) => {
   try {
-    const candidate = await Candidate.findByIdAndDelete(req.params.id);
+    const candidate = await deleteCandidate(req.params.id);
     if (!candidate) return res.status(404).json({ message: 'Candidate not found' });
 
     res.status(200).json({ message: 'Candidate deleted' });
@@ -152,8 +122,7 @@ exports.deleteCandidate = async (req, res) => {
 // Get all students who voted
 exports.getVotedStudents = async (req, res) => {
     try {
-      const votes = await Vote.find().populate('voter');
-      const voters = votes.map(v => v.voter);
+      const voters = await getVotedStudents();
       res.status(200).json({ voters });
     } catch (err) {
       res.status(500).json({ message: err.message });
@@ -163,11 +132,7 @@ exports.getVotedStudents = async (req, res) => {
   // Get all students who did NOT vote
   exports.getNonVotedStudents = async (req, res) => {
     try {
-      const allStudents = await User.find({ role: 'student' });
-      const votes = await Vote.find();
-      const votedIds = votes.map(v => v.voter.toString());
-  
-      const nonVoters = allStudents.filter(student => !votedIds.includes(student._id.toString()));
+      const nonVoters = await getNonVotedStudents();
   
       res.status(200).json({ nonVoters });
     } catch (err) {
@@ -179,9 +144,9 @@ exports.getVotedStudents = async (req, res) => {
     try {
       const electionId = req.params.electionId;
   
-      const candidates = await Candidate.find({ election: electionId });
+      const candidates = await findCandidatesByElection(electionId);
   
-      const votes = await Vote.find({}).populate('candidate');
+      const votes = await getVotesByCandidate();
   
       const resultMap = {};
   

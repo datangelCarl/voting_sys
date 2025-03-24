@@ -10,17 +10,19 @@ const candidateSchema = new mongoose.Schema({
     required: true,
   },
   department: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Department',
     required: true,
   },
   college: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'College',
     required: true,
   },
   position: {
     type: String,
     required: true,
-    enum: ['President', 'Vice President', 'Secretary', 'Treasurer', 'Class Representative'], // customize as needed
+    enum: ['President', 'Vice President', 'Secretary', 'Treasurer', 'Class Representative'], 
   },
   createdAt: {
     type: Date,

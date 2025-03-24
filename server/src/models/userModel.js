@@ -2,16 +2,19 @@ const User = require("../schemas/userSchema");
 const { hashPassword } = require("../utils/authUtils");
 
 module.exports = {
-  createUser: async (firstName, lastName, password, email, age, department, college) => {
+  // Updated to match userSchema
+  createUser: async ({ name, email, password, role, college, department }) => {
+    const hashed = await hashPassword(password);
+
     const payload = {
-      firstName,
-      lastName,
-      password: await hashPassword(password),
+      name,
       email,
-      age,
-      department,
-      college,
+      password: hashed,
+      role,
+      college: role === 'student' ? college : undefined,
+      department: role === 'student' ? department : undefined,
     };
+
     return await User.create(payload);
   },
 
@@ -19,21 +22,7 @@ module.exports = {
     return await User.findOne({ email });
   },
 
-  getAllStudents: async () => {
-    return await User.find({ role: 'student' });
-  },
-
-  deleteUser: async (id) => {
-    return await User.findByIdAndDelete(id);
-  },
-
-  updateUserRole: async (id, newRole) => {
-    return await User.findByIdAndUpdate(id, { role: newRole }, { new: true });
-  }, 
-
   updateUserVote: async (userId) => {
     return await User.findByIdAndUpdate(userId, { hasVoted: true }, { new: true });
-  },
-  
-  
+  }
 };

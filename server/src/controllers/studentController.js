@@ -1,6 +1,5 @@
 const { findUserByEmail, updateUserVote } = require('../models/userModel');
-const Candidate = require('../schemas/candidateSchema');
-const Vote = require('../schemas/voteSchema');
+const {castVote, getVoteStatus} = require('../models/voteModel');
 
 // Cast a Vote
 exports.vote = async (req, res, next) => {
@@ -15,16 +14,7 @@ exports.vote = async (req, res, next) => {
       return res.status(403).json({ message: 'You have already voted' });
     }
 
-    const candidate = await Candidate.findById(candidateId);
-    if (!candidate) return res.status(404).json({ message: 'Candidate not found' });
-
-    const vote = new Vote({
-      voter: userId,
-      candidate: candidateId,
-      election: candidate.election, // assumes Candidate schema includes election ref
-    });
-    await vote.save();
-
+    await castVote(userId, candidateId);
     await updateUserVote(userId);
 
     res.status(200).json({ message: 'Vote submitted successfully' });
@@ -34,13 +24,10 @@ exports.vote = async (req, res, next) => {
   }
 };
 
-// ✅ Get Realtime Vote Status
+
 exports.getVoteStatus = async (req, res, next) => {
   try {
-    const status = await Vote.find()
-      .populate('candidate', 'name position')
-      .populate('voter', 'name email');
-
+    const status = await getVoteStatus();
     res.status(200).json({ totalVotes: status.length, votes: status });
 
   } catch (err) {

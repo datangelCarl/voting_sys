@@ -5,7 +5,7 @@ const voteSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', 
     required: true,
-    unique: true, // one vote per student
+    unique: true, 
   },
   candidate: {
     type: mongoose.Schema.Types.ObjectId,

@@ -9,7 +9,4 @@ const departmentSchema = z.object({
   collegeId: z.string().min(1, 'College ID is required'),
 });
 
-module.exports = {
-  collegeSchema,
-  departmentSchema,
-};
+module.exports = {collegeSchema,departmentSchema,};
