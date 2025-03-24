@@ -2,6 +2,15 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
 const {verifyToken, requireAdmin} = require('../utils/authMiddleware');
+const {validate} = require('../utils/validate');
+const { collegeSchema, departmentSchema } = require('../validator/adminValidation');
+
+// College and Department Routes
+router.post('/college', verifyToken, requireAdmin, validate(collegeSchema), adminController.createCollege);
+router.delete('/college/:id', verifyToken, requireAdmin, adminController.deleteCollege);
+
+router.post('/department', verifyToken, requireAdmin, validate(departmentSchema), adminController.createDepartment);
+router.delete('/department/:id', verifyToken, requireAdmin, adminController.deleteDepartment);
 
 // Election Routes
 router.post('/elections',verifyToken, requireAdmin, adminController.createElection);

@@ -6,8 +6,6 @@ const dbConnect = require("./libs/db");
 const studentRoutes = require("./routes/studentRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const authRoutes = require("./routes/authRoutes");
-
-
 const errorMiddleware = require("./utils/error.middleware");
 
 dotenv.config();
@@ -15,7 +13,7 @@ dotenv.config();
 const app = express();
 
 
-app.use(cors());
+app.use(cors({origin: "http://localhost:3000", credentials: true}));
 app.use(morgan("dev"));
 
 app.use(express.json());

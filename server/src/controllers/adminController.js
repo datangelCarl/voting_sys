@@ -2,21 +2,78 @@ const Candidate = require('../schemas/candidateSchema');
 const Election = require('../schemas/electionSchema');
 const User = require('../schemas/userSchema');
 const Vote = require('../schemas/voteSchema');
+const College = require('../schemas/collegeSchema');
+
+//create College
+exports.createCollege = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const college = new College({ name });
+    await college.save();
+    res.status(201).json({ message: 'College created', college });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+//delete College
+exports.deleteCollege = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await College.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ message: 'College not found' });
+    res.status(200).json({ message: 'College deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+//create department
+const Department = require('../schemas/departmentSchema');
+
+exports.createDepartment = async (req, res) => {
+  try {
+    const { name, collegeId } = req.body;
+
+    const department = new Department({ name, college: collegeId });
+    await department.save();
+
+    res.status(201).json({ message: 'Department created', department });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+//delete department
+exports.deleteDepartment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Department.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ message: 'Department not found' });
+    res.status(200).json({ message: 'Department deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 
 // Create Election
 exports.createElection = async (req, res) => {
     try {
-      const { name, position, college, department, startDate, endDate } = req.body;
+      const { name, position, collegeId, departmentId, startDate, endDate } = req.body;
   
       const election = new Election({
         name,
         position,
-        college,
-        department,
+        college: collegeId,
+        department: departmentId,
         startDate,
         endDate,
         status: 'upcoming',
-      });
+      });      
   
       await election.save();
   
@@ -45,26 +102,40 @@ exports.createElection = async (req, res) => {
 // Add Candidate
 exports.addCandidate = async (req, res) => {
   try {
-    const { firstName, lastName, position, college, department, electionId } = req.body;
+    const { firstName, lastName, position, electionId } = req.body;
 
+    // Validate Election
     const election = await Election.findById(electionId);
     if (!election) return res.status(404).json({ message: 'Election not found' });
+
+    // Use the college and department from the election
+    const collegeId = election.college;
+    const departmentId = election.department;
+
+    // Optionally, validate if college and department exist (if needed)
+    const college = await College.findById(collegeId);
+    if (!college) return res.status(404).json({ message: 'College not found (from election)' });
+
+    const department = await Department.findById(departmentId);
+    if (!department) return res.status(404).json({ message: 'Department not found (from election)' });
 
     const candidate = new Candidate({
       firstName,
       lastName,
       position,
-      college,
-      department,
       election: electionId,
+      college: collegeId,
+      department: departmentId,
     });
 
     await candidate.save();
     res.status(201).json({ message: 'Candidate added', candidate });
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 // Delete Candidate
 exports.deleteCandidate = async (req, res) => {

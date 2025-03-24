@@ -2,7 +2,7 @@ const { findUserByEmail, updateUserVote } = require('../models/userModel');
 const Candidate = require('../schemas/candidateSchema');
 const Vote = require('../schemas/voteSchema');
 
-// ✅ Cast a Vote
+// Cast a Vote
 exports.vote = async (req, res, next) => {
   try {
     const userId = req.user.userId; // from JWT middleware

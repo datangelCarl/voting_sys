@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const voteSchema = new mongoose.Schema({
   voter: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // assuming your student/voter model is named 'User'
+    ref: 'User', 
     required: true,
     unique: true, // one vote per student
   },

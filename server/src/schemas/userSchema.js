@@ -9,8 +9,14 @@ const userSchema = new mongoose.Schema({
     enum: ['admin', 'student'],
     required: true,
   },
-  college: String,
-  department: String,
+  college: {
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'College', 
+    required: function() { return this.role === 'student'; } },
+  department: {
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Department',
+     required: function() { return this.role === 'student'; } },
   hasVoted: { type: Boolean, default: false },
 }, { timestamps: true });
 
