@@ -1,4 +1,4 @@
-const { z } = require('zod');
+const { z } = require('zod'); //validates input data
 
 const collegeSchema = z.object({
   name: z.string().min(1, 'College name is required'),

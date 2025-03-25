@@ -1,7 +1,7 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const cors = require("cors");
-const morgan = require("morgan");
+const express = require("express");//web framework
+const dotenv = require("dotenv"); 
+const cors = require("cors"); //communication sa backend sa frontend
+const morgan = require("morgan");//logs request to your server
 const dbConnect = require("./libs/db");
 const studentRoutes = require("./routes/studentRoutes");
 const adminRoutes = require("./routes/adminRoutes");

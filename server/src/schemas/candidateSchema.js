@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose');//js and mongodb translation/ interact with database
 
 const candidateSchema = new mongoose.Schema({
   firstName: {

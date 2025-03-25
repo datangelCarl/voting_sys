@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const {comparePassword} = require('../utils/authUtils');
 const jwt = require('jsonwebtoken');
 const { createUser, findUserByEmail } = require('../models/userModel');
 
@@ -39,7 +38,7 @@ exports.login = async (req, res) => {
     const user = await findUserByEmail(email);
     if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await comparePassword(password, user.password);
     if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign(
