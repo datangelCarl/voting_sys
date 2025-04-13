@@ -1,4 +1,7 @@
-const { comparePassword } = require('../utils/authUtils');
+
+
+const {comparePassword} = require('../utils/authUtils')
+
 const jwt = require('jsonwebtoken');
 const { createUser, findUserByEmail, findUserByIdNumber } = require('../models/userModel');
 
