@@ -13,16 +13,16 @@ dotenv.config();
 const app = express();
 
 
-app.use(cors({origin: "http://localhost:3000", credentials: true}));
+app.use(cors({origin: "http://192.168.1.26:3000", credentials: true}));
 app.use(morgan("dev"));
 
 app.use(express.json());
+app.use(errorMiddleware);
 app.use("/api/student", studentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 
 
-app.use(errorMiddleware);
 
 dbConnect((client) => {
     if (client) {

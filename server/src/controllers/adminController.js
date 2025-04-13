@@ -1,5 +1,5 @@
-const {createCollege, deleteCollege, findCollegeById} = require('../models/collegeModel');
-const {createDepartment, deleteDepartment, findDepartmentById} = require('../models/departmentModel');
+const {createCollege, deleteCollege, findCollegeById, getAllColleges} = require('../models/collegeModel');
+const {createDepartment, deleteDepartment, findDepartmentById, getAllDepartments} = require('../models/departmentModel');
 const {createElection, deleteElection, findElectionById} = require('../models/electionModel');
 const {createCandidate, deleteCandidate, findCandidatesByElection} = require('../models/candidateModel');
 const {getVotedStudents, getNonVotedStudents, getVotesByCandidate} = require('../models/voteModel');
@@ -19,6 +19,23 @@ exports.deleteCollege = async (req, res) => {
     const deleted = await deleteCollege(req.params.id);
     if (!deleted) return res.status(404).json({ message: 'College not found' });
     res.status(200).json({ message: 'College deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+exports.getColleges = async (req, res) => {
+  try {
+    const colleges = await getAllColleges();
+
+    // 🔥 Clean the response
+    const cleanedColleges = colleges.map(college => ({
+      id: college._id,
+      name: college.name
+    }));
+
+    res.status(200).json({ colleges: cleanedColleges});
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -50,6 +67,27 @@ exports.deleteDepartment = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
+// controllers/departmentController.js
+exports.getDepartments = async (req, res) => {
+  try {
+    const { collegeId } = req.params;
+
+    const departments = await getAllDepartments(collegeId);
+
+    const cleanedDepartments = departments.map(dept => ({
+      id: dept._id,
+      name: dept.name,
+      collegeName: dept.college?.name || 'Unknown College',
+    }));
+
+    res.status(200).json({ departments: cleanedDepartments });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 
 
 // Create Election
