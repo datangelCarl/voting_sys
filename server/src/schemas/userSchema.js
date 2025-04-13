@@ -1,9 +1,18 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  name: { 
-    type: String, 
-    required: true 
+  idNumber: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  firstname: {
+    type: String,
+    required: true
+  },
+  lastname: {
+    type: String,
+    required: true
   },
   email: { 
     type: String, 
@@ -14,26 +23,34 @@ const userSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
-  role: {
-    type: String,
-    enum: ['admin', 'student'],
-    required: true,
-  },
   college: {
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'College', 
-    required: function() { 
-      return this.role === 'student'; 
-    } 
+    required: true
   },
   department: {
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Department',
-     required: function() { 
-      return this.role === 'student'; 
-    } 
+    required: true
   },
-  hasVoted: { type: Boolean, default: false },
+  yearLevel: {
+    type: String,
+    enum: ['1st Year', '2nd Year', '3rd Year', '4th Year'],
+    required: true
+  },
+  section: {
+    type: String,
+    required: true
+  },
+  hasVoted: { 
+    type: Boolean, 
+    default: false 
+  },
+  role: {
+    type: String,
+    enum: ['admin', 'student'],
+    default: 'user'
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

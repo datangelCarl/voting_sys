@@ -1,29 +1,52 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const { comparePassword } = require('../utils/authUtils');
 const jwt = require('jsonwebtoken');
-const { createUser, findUserByEmail } = require('../models/userModel');
+const { createUser, findUserByEmail, findUserByIdNumber } = require('../models/userModel');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
 
-
-
-exports.register = async (req, res) => {
+const register = async (req, res) => {
   try {
-    const { name, email, password, role, college, department } = req.body;
+    const {
+      idNumber,
+      firstname,
+      lastname,
+      email,
+      password,
+      college,
+      department,
+      yearLevel,
+      section
+    } = req.body;
+
+    if (!idNumber || !firstname || !lastname || !email || !password || !college || !department || !yearLevel || !section) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
 
     const existingUser = await findUserByEmail(email);
     if (existingUser) return res.status(409).json({ message: 'Email already exists' });
 
-    if (role === 'student' && (!college || !department)) {
-      return res.status(400).json({ message: 'College and department are required for student registration' });
-    }
-
-    const newUser = await createUser({ name, email, password, role, college, department });
+    const newUser = await createUser({
+      idNumber,
+      firstname,
+      lastname,
+      email,
+      password,
+      college,
+      department,
+      yearLevel,
+      section,
+      role: 'student'
+    });
 
     res.status(201).json({
       message: 'User registered successfully',
-      user: { name: newUser.name, email: newUser.email, role: newUser.role }
+      user: {
+        firstname: newUser.firstname,
+        lastname: newUser.lastname,
+        email: newUser.email,
+        idNumber: newUser.idNumber
+      }
     });
 
   } catch (err) {
@@ -32,24 +55,38 @@ exports.register = async (req, res) => {
 };
 
 
-exports.login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
 
-    const user = await findUserByEmail(email);
+const login = async (req, res) => {
+  try {
+    const { idNumber, password } = req.body; // Get idNumber and password from request
+
+    const user = await findUserByIdNumber(idNumber); // Find user by idNumber
     if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await comparePassword(password, user.password);
     if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role },
+      { userId: user._id, idNumber: user.idNumber, role: user.role }, // Use idNumber instead of email in token
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );
 
-    res.status(200).json({ message: 'Login successful', token, user: { name: user.name, role: user.role } });
+    res.status(200).json({
+      message: 'Login successful',
+      token,
+      user: {
+        firstname: user.firstname,
+        lastname: user.lastname,
+        idNumber: user.idNumber
+      }
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
+
+module.exports = {
+  register, login
+}
