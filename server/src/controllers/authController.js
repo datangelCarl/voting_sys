@@ -1,9 +1,7 @@
 const { comparePassword } = require('../utils/authUtils');
 const jwt = require('jsonwebtoken');
 const { createUser, findUserByEmail, findUserByIdNumber } = require('../models/userModel');
-
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
+const {signToken} = require('../utils/jwt');
 
 const register = async (req, res) => {
   try {
@@ -66,11 +64,11 @@ const login = async (req, res) => {
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign(
-      { userId: user._id, idNumber: user.idNumber, role: user.role }, // Use idNumber instead of email in token
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+    const token = signToken({ 
+      userId: user._id, 
+      idNumber: user.idNumber, 
+      role: user.role 
+    });
 
     res.status(200).json({
       message: 'Login successful',
