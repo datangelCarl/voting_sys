@@ -11,7 +11,7 @@ router.post('/login', validate(loginSchema), adminController.login);
 // College routes
 router.post('/college', verifyToken, requireAdmin, validate(collegeSchema), adminController.createCollege);
 router.delete('/college/:id', verifyToken, requireAdmin, adminController.deleteCollege);
-router.get('/college',verifyToken, requireAdmin, adminController.getColleges); // <-- added
+router.get('/college', adminController.getColleges); // <-- added
 
 // Department routes
 router.post('/department', verifyToken, requireAdmin, validate(departmentSchema), adminController.createDepartment);
