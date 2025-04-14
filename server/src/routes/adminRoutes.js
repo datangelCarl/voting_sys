@@ -3,7 +3,10 @@ const router = express.Router();
 const adminController = require('../controllers/adminController');
 const { verifyToken, requireAdmin } = require('../utils/authMiddleware');
 const { validate } = require('../utils/validate');
-const { collegeSchema, departmentSchema } = require('../validator/adminValidation');
+const { collegeSchema, departmentSchema, loginSchema } = require('../validator/adminValidation');
+
+
+router.post('/login', validate(loginSchema), adminController.login);
 
 // College routes
 router.post('/college', verifyToken, requireAdmin, validate(collegeSchema), adminController.createCollege);

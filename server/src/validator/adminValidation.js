@@ -9,4 +9,8 @@ const departmentSchema = z.object({
   collegeId: z.string().min(1, 'College ID is required'),
 });
 
-module.exports = {collegeSchema,departmentSchema,};
+const loginSchema = z.object({
+  username: z.string().min(1, 'Username is required'),
+  password: z.string()
+});
+module.exports = {collegeSchema,departmentSchema,loginSchema};

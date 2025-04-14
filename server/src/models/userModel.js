@@ -42,4 +42,8 @@ module.exports = {
   findUserByIdNumber: async (idNumber) => {
     return await User.findOne({ idNumber });
   },
+
+  findAdminByUsername: async (username) => {
+    return await User.findOne({ username });
+  },
 };
